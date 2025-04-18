@@ -1,0 +1,4 @@
+module RNConfig {
+  header "RNConfig.h"
+  export *
+}

@@ -3,6 +3,17 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
 
+// Add this code to load environment variables for Facebook configuration
+def getNpmConfigValue(String envName) {
+    Properties properties = new Properties()
+    def envFile = rootProject.file("../.env")
+    if (envFile.exists()) {
+        properties.load(new FileInputStream(envFile))
+        return properties.get(envName)
+    }
+    return ""
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -85,6 +96,12 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        
+        // Add Facebook App ID and Client Token from .env file
+        def fbAppId = getNpmConfigValue("FACEBOOK_APP_ID") ?: "fb_app_id_placeholder"
+        resValue "string", "facebook_app_id", fbAppId
+        resValue "string", "facebook_client_token", getNpmConfigValue("FACEBOOK_CLIENT_TOKEN") ?: "fb_client_token_placeholder"
+        resValue "string", "fb_login_protocol_scheme", "fb" + fbAppId
     }
     signingConfigs {
         debug {
@@ -111,6 +128,9 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+
+    // Add Facebook SDK dependencies
+    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

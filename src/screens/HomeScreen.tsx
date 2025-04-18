@@ -46,9 +46,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   return (
     <View style={styles.screenContainer}>
-      {user?.avatar && getAvatarUrl() && (
+      {/* {user?.avatar && getAvatarUrl() && (
         <Image source={{ uri: getAvatarUrl() }} style={styles.avatar} />
-      )}
+      )} */}
 
       <Text h1 style={isDarkMode ? styles.darkText : styles.lightText}>
         Welcome

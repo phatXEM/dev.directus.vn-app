@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '@services/api';
 import { appleAuthService } from '@services/appleAuth';
+import { facebookAuthService } from '@services/facebookAuth';
 
 type User = {
   id: string;
@@ -10,13 +11,21 @@ type User = {
   last_name?: string;
   avatar?: string;
   role?: string;
+  provider?: string;
+};
+
+type AuthResult = {
+  success: boolean;
+  error?: string;
+  user?: User | null;
 };
 
 type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  loginWithApple: () => Promise<boolean>;
+  loginWithApple: () => Promise<AuthResult>;
+  loginWithFacebook: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   user: User | null;
   isAppleAuthAvailable: boolean;
@@ -89,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const loginWithApple = async (): Promise<boolean> => {
+  const loginWithApple = async (): Promise<AuthResult> => {
     try {
       setIsLoading(true);
 
@@ -98,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       console.log('Apple login result:', result);
 
-      if(result.access_token && result.refresh_token) {
+      if (result.access_token && result.refresh_token) {
         // Store tokens
         await AsyncStorage.setItem('@auth_token', result.access_token);
         await AsyncStorage.setItem('@refresh_token', result.refresh_token);
@@ -111,13 +120,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // Update state
         setUser(userData);
         setIsAuthenticated(true);
-        return true;
+        return { success: true, user: userData };
       }
 
-      return false;
+      return { success: false };
     } catch (error) {
       console.error('Apple login error:', error);
-      return false;
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithFacebook = async (): Promise<AuthResult> => {
+    try {
+      setIsLoading(true);
+
+      const result = await facebookAuthService.signInWithFacebook();
+
+      if (result.access_token && result.refresh_token) {
+        // Store tokens
+        await AsyncStorage.setItem('@auth_token', result.access_token);
+        await AsyncStorage.setItem('@refresh_token', result.refresh_token);
+
+        // After successful login, get user data
+        const userData = await authService.getCurrentUser();
+        console.log('User data from Facebook login:', userData);
+        await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+
+        // Update state
+        setUser(userData);
+        setIsAuthenticated(true);
+        return { success: true, user: userData };
+      }
+
+      return { success: false };
+    } catch (error) {
+      console.error('Facebook login error:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      return {
+        success: false,
+        error: errorMessage,
+      };
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +174,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setIsLoading(true);
 
-      // Call logout service
+      // Call logout service based on provider
+      if (user?.provider === 'facebook') {
+        await facebookAuthService.logoutFromFacebook();
+      }
+
+      // Always call main logout to clear tokens
       await authService.logout();
 
       // Update state
@@ -147,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isLoading,
         login,
         loginWithApple,
+        loginWithFacebook,
         logout,
         user,
         isAppleAuthAvailable,

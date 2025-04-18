@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">rn_apple_login</string>
+    <string name="app_name">Dev Directus</string>
+    <!-- Facebook configuration values are dynamically added at build time from the .env file -->
 </resources>

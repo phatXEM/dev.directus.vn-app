@@ -6,17 +6,24 @@ import {
   Platform,
   useColorScheme,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { Button, Input, Text, Icon, Divider } from 'react-native-elements';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@context/AuthContext';
 import { loginSchema, LoginFormData } from '@validation/auth';
-import { AppleButton } from '@invertase/react-native-apple-authentication';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const LoginScreen = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { login, loginWithApple, isLoading, isAppleAuthAvailable } = useAuth();
+  const {
+    login,
+    loginWithApple,
+    loginWithFacebook,
+    isLoading,
+    isAppleAuthAvailable,
+  } = useAuth();
   const isDarkMode = useColorScheme() === 'dark';
 
   const {
@@ -46,6 +53,54 @@ const LoginScreen = () => {
         'An unexpected error occurred. Please try again later.',
       );
       console.error(error);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const result = await loginWithApple();
+
+      if (!result.success) {
+        const errorMessage = result.error
+          ? `Could not sign in with Apple: ${result.error}`
+          : 'Could not sign in with Apple. Please try again.';
+
+        Alert.alert('Sign in Failed', errorMessage);
+      }
+    } catch (error) {
+      console.error('Apple sign in error in component:', error);
+
+      let errorMessage =
+        'An unexpected error occurred. Please try again later.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      const result = await loginWithFacebook();
+
+      if (!result.success) {
+        const errorMessage = result.error
+          ? `Could not sign in with Facebook: ${result.error}`
+          : 'Could not sign in with Facebook. Please try again.';
+
+        Alert.alert('Sign in Failed', errorMessage);
+      }
+    } catch (error) {
+      console.error('Facebook sign in error in component:', error);
+
+      let errorMessage =
+        'An unexpected error occurred. Please try again later.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -83,13 +138,7 @@ const LoginScreen = () => {
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               placeholder="Email"
-              leftIcon={
-                <Icon
-                  name="email"
-                  type="material"
-                  // color={isDarkMode ? '#FFFFFF' : '#86939e'}
-                />
-              }
+              leftIcon={<Icon name="email" type="material" />}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -112,18 +161,11 @@ const LoginScreen = () => {
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               placeholder="Password"
-              leftIcon={
-                <Icon
-                  name="lock"
-                  type="material"
-                  // color={isDarkMode ? '#FFFFFF' : '#86939e'}
-                />
-              }
+              leftIcon={<Icon name="lock" type="material" />}
               rightIcon={
                 <Icon
                   name={secureTextEntry ? 'eye-off' : 'eye'}
                   type="ionicon"
-                  // color={isDarkMode ? '#FFFFFF' : '#86939e'}
                   onPress={toggleSecureEntry}
                 />
               }
@@ -150,30 +192,64 @@ const LoginScreen = () => {
           disabled={isLoading}
         />
 
-        {isAppleAuthAvailable && (
-          <>
-            <View style={styles.dividerContainer}>
-              <Divider style={styles.divider} />
-              <Text
-                style={[
-                  styles.dividerText,
-                  isDarkMode ? styles.darkText : styles.lightText,
-                ]}
-              >
-                or
-              </Text>
-              <Divider style={styles.divider} />
-            </View>
+        <View style={styles.dividerContainer}>
+          <Divider style={styles.divider} />
+          <Text
+            style={[
+              styles.dividerText,
+              isDarkMode ? styles.darkText : styles.lightText,
+            ]}
+          >
+            or
+          </Text>
+          <Divider style={styles.divider} />
+        </View>
 
-            <AppleButton
-              style={{
-                width: 200,
-                height: 45,
-                borderRadius: 10,
-              }}
-              onPress={loginWithApple}
+        {/* Facebook Login Button */}
+        <TouchableOpacity
+          style={[styles.socialButton, styles.facebookButton]}
+          onPress={handleFacebookSignIn}
+          disabled={isLoading}
+        >
+          <FontAwesome
+            name="facebook-official"
+            size={22}
+            color="#FFFFFF"
+            style={styles.socialIcon}
+          />
+          <Text style={styles.facebookButtonText}>Sign in with Facebook</Text>
+        </TouchableOpacity>
+
+        {/* Apple Login Button */}
+        {isAppleAuthAvailable && (
+          <TouchableOpacity
+            style={[
+              styles.socialButton,
+              styles.appleButton,
+              {
+                backgroundColor: isDarkMode ? '#FFFFFF' : '#000000',
+              },
+            ]}
+            onPress={handleAppleSignIn}
+            disabled={isLoading}
+          >
+            <FontAwesome
+              name="apple"
+              size={22}
+              color={isDarkMode ? '#000000' : '#FFFFFF'}
+              style={styles.socialIcon}
             />
-          </>
+            <Text
+              style={[
+                styles.appleButtonText,
+                {
+                  color: isDarkMode ? '#000000' : '#FFFFFF',
+                },
+              ]}
+            >
+              Sign in with Apple
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
     </KeyboardAvoidingView>
@@ -209,9 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 15,
   },
-  darkText: {
-    // color: '#FFFFFF',
-  },
+  darkText: {},
   lightText: {
     color: '#000000',
   },
@@ -223,7 +297,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 30,
-    marginBottom: 30,
+    marginBottom: 20,
     width: '80%',
   },
   divider: {
@@ -233,18 +307,31 @@ const styles = StyleSheet.create({
   dividerText: {
     marginHorizontal: 10,
   },
-  appleButton: {
+  socialButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 25,
     padding: 15,
     width: '80%',
+    marginBottom: 15,
   },
-  appleIcon: {
+  socialIcon: {
     marginRight: 10,
   },
+  facebookButton: {
+    backgroundColor: '#1877F2',
+  },
+  facebookButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  appleButton: {
+    backgroundColor: '#000000',
+  },
   appleButtonText: {
+    color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,
   },

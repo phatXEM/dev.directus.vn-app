@@ -33,6 +33,35 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	
+	<!-- Facebook SDK configuration - these are placeholder values that will be overridden at runtime -->
+	<key>FacebookAppID</key>
+	<string>9668855269861444</string>
+	<key>FacebookDisplayName</key>
+	<string>Dev Directus</string>
+	<key>FacebookClientToken</key>
+	<string>ed95c20d6c8a0c139446993047bf09cb</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb9668855269861444</string>
+			</array>
+		</dict>
+	</array>
+	
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

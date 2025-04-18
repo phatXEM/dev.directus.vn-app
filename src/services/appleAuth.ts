@@ -1,6 +1,5 @@
-import appleAuth from '@invertase/react-native-apple-authentication';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import appleAuth from '@invertase/react-native-apple-authentication';
 import axios from 'axios';
 import { APPLE_REDIRECT_URI } from '@env';
 
