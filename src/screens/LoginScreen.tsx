@@ -21,6 +21,7 @@ const LoginScreen = () => {
     login,
     loginWithApple,
     loginWithFacebook,
+    loginWithGoogle,
     isLoading,
     isAppleAuthAvailable,
   } = useAuth();
@@ -93,6 +94,30 @@ const LoginScreen = () => {
       }
     } catch (error) {
       console.error('Facebook sign in error in component:', error);
+
+      let errorMessage =
+        'An unexpected error occurred. Please try again later.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await loginWithGoogle();
+
+      if (!result.success) {
+        const errorMessage = result.error
+          ? `Could not sign in with Google: ${result.error}`
+          : 'Could not sign in with Google. Please try again.';
+
+        Alert.alert('Sign in Failed', errorMessage);
+      }
+    } catch (error) {
+      console.error('Google sign in error in component:', error);
 
       let errorMessage =
         'An unexpected error occurred. Please try again later.';
@@ -204,6 +229,21 @@ const LoginScreen = () => {
           </Text>
           <Divider style={styles.divider} />
         </View>
+
+        {/* Google Login Button */}
+        <TouchableOpacity
+          style={[styles.socialButton, styles.googleButton]}
+          onPress={handleGoogleSignIn}
+          disabled={isLoading}
+        >
+          <FontAwesome
+            name="google"
+            size={22}
+            color="#FFFFFF"
+            style={styles.socialIcon}
+          />
+          <Text style={styles.googleButtonText}>Sign in with Google</Text>
+        </TouchableOpacity>
 
         {/* Facebook Login Button */}
         <TouchableOpacity
@@ -331,6 +371,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   appleButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  googleButton: {
+    backgroundColor: '#DB4437',
+  },
+  googleButtonText: {
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 16,

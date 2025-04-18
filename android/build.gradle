@@ -18,6 +18,9 @@ buildscript {
     }
 }
 
+// Apply our custom React Native configuration
+apply from: file("react-native-config.gradle")
+
 allprojects {
     repositories {
         google()
@@ -25,6 +28,35 @@ allprojects {
         // Add Facebook Maven repository
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.facebook.com/maven2/' }
+    }
+}
+
+// Fix for npx not found error
+gradle.taskGraph.beforeTask { task ->
+    if (task instanceof Exec) {
+        if (task.commandLine.find { it?.contains("npx") }) {
+            // Modify the PATH environment variable to include our Node.js directory
+            def path = System.getenv("PATH")
+            def nodeBinDir = rootProject.ext.nodeExecutables.dir
+            
+            // Replace the npx command with the full path to our npx executable
+            task.commandLine = task.commandLine.collect { cmd ->
+                if (cmd?.contains("npx")) {
+                    return rootProject.ext.nodeExecutables.npx
+                }
+                return cmd
+            }
+            
+            // Set environment variables for the task
+            task.environment("PATH", "${nodeBinDir}:${path}")
+            task.environment("NODE_PATH", nodeBinDir)
+            
+            // Log the command for debugging
+            task.doFirst {
+                println "Running command: ${task.commandLine.join(' ')}"
+                println "With PATH: ${task.environment.get('PATH')}"
+            }
+        }
     }
 }
 

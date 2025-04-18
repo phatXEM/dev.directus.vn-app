@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Dev Directus</string>
     <!-- Facebook configuration values are dynamically added at build time from the .env file -->
+    
+    <!-- Google Sign-In Configuration -->
+    <string name="server_client_id">@string/google_client_id</string>
 </resources>

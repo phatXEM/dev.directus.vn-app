@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '@services/api';
 import { appleAuthService } from '@services/appleAuth';
 import { facebookAuthService } from '@services/facebookAuth';
+import { googleAuthService } from '@services/googleAuth';
 
 type User = {
   id: string;
@@ -26,6 +27,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   loginWithApple: () => Promise<AuthResult>;
   loginWithFacebook: () => Promise<AuthResult>;
+  loginWithGoogle: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   user: User | null;
   isAppleAuthAvailable: boolean;
@@ -170,6 +172,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const loginWithGoogle = async (): Promise<AuthResult> => {
+    try {
+      setIsLoading(true);
+
+      const result = await googleAuthService.signInWithGoogle();
+
+      if (result.access_token && result.refresh_token) {
+        // Store tokens
+        await AsyncStorage.setItem('@auth_token', result.access_token);
+        await AsyncStorage.setItem('@refresh_token', result.refresh_token);
+
+        // After successful login, get user data
+        const userData = await authService.getCurrentUser();
+        console.log('User data from Google login:', userData);
+        await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+
+        // Update state
+        setUser(userData);
+        setIsAuthenticated(true);
+        return { success: true, user: userData };
+      }
+
+      return { success: false };
+    } catch (error) {
+      console.error('Google login error:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -177,6 +215,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Call logout service based on provider
       if (user?.provider === 'facebook') {
         await facebookAuthService.logoutFromFacebook();
+      } else if (user?.provider === 'google') {
+        await googleAuthService.signOutFromGoogle();
       }
 
       // Always call main logout to clear tokens
@@ -200,6 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         loginWithApple,
         loginWithFacebook,
+        loginWithGoogle,
         logout,
         user,
         isAppleAuthAvailable,

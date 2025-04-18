@@ -5,4 +5,8 @@ declare module '@env' {
   export const FACEBOOK_APP_ID: string;
   export const FACEBOOK_CLIENT_TOKEN: string;
   export const FACEBOOK_REDIRECT_URI: string;
+  export const GOOGLE_CLIENT_ID: string;
+  export const GOOGLE_ANDROID_CLIENT_ID: string;
+  export const GOOGLE_IOS_CLIENT_ID: string;
+  export const GOOGLE_REDIRECT_URI: string;
 }

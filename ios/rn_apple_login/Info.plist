@@ -20,8 +20,44 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb9668855269861444</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.170077490947-rvbi221c6uuf78d8sr1so9upiupcpnnr</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<false/>
+	<key>FacebookAppID</key>
+	<string>9668855269861444</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
+	<key>FacebookClientToken</key>
+	<string>ed95c20d6c8a0c139446993047bf09cb</string>
+	<key>FacebookDisplayName</key>
+	<string>Dev Directus</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+		<string>googlechrome</string>
+		<string>googlechromes</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -33,35 +69,8 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
-	
-	<!-- Facebook SDK configuration - these are placeholder values that will be overridden at runtime -->
-	<key>FacebookAppID</key>
-	<string>9668855269861444</string>
-	<key>FacebookDisplayName</key>
-	<string>Dev Directus</string>
-	<key>FacebookClientToken</key>
-	<string>ed95c20d6c8a0c139446993047bf09cb</string>
-	<key>FacebookAutoLogAppEventsEnabled</key>
-	<true/>
-	<key>FacebookAdvertiserIDCollectionEnabled</key>
-	<false/>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>fbapi</string>
-		<string>fb-messenger-share-api</string>
-		<string>fbauth2</string>
-		<string>fbshareextension</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>fb9668855269861444</string>
-			</array>
-		</dict>
-	</array>
-	
+	<key>GIDClientID</key>
+	<string>170077490947-rvbi221c6uuf78d8sr1so9upiupcpnnr.apps.googleusercontent.com</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

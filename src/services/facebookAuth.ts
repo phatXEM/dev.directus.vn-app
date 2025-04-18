@@ -108,7 +108,6 @@ export const facebookAuthService = {
       const res = await axios.post(
         FACEBOOK_REDIRECT_URI,
         {
-          access_token: data.accessToken,
           email: (currentProfile as any)?.email || '',
           name: (currentProfile as any)?.name || '',
         },

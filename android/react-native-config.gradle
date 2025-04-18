@@ -1,0 +1,46 @@
+// This file contains custom configuration for React Native's build process
+// to help locate the Node.js executables when using nvm or other version managers
+
+def getNvmNodeExecutable() {
+    // Get the user's home directory
+    def userHome = System.getProperty("user.home")
+    // NVM directory is typically in the user's home directory
+    def nvmDir = System.getenv("NVM_DIR") ?: "${userHome}/.nvm"
+    
+    // Try to find the currently active Node.js version through bash
+    def nodeVersionCmd = ["bash", "-c", "source ${nvmDir}/nvm.sh > /dev/null && node -v"]
+    def nodeVersion = "v22.14.0" // Default fallback version
+    
+    try {
+        def process = nodeVersionCmd.execute()
+        process.waitFor()
+        if (process.exitValue() == 0) {
+            nodeVersion = process.text.trim()
+        } else {
+            println "Warning: Could not determine Node.js version, using default: ${nodeVersion}"
+            println "Error output: ${process.err.text}"
+        }
+    } catch (Exception e) {
+        println "Warning: Error executing Node.js version check: ${e.message}"
+        println "Using default Node.js version: ${nodeVersion}"
+    }
+    
+    // Define the paths to the executables
+    def nodeBinDir = "${nvmDir}/versions/node/${nodeVersion}/bin"
+    
+    return [
+        dir: nodeBinDir,
+        node: "${nodeBinDir}/node",
+        npm: "${nodeBinDir}/npm",
+        npx: "${nodeBinDir}/npx"
+    ]
+}
+
+// Get and store the executable paths
+ext {
+    nodeExecutables = getNvmNodeExecutable()
+}
+
+println "Node.js executables detected at: ${nodeExecutables.dir}"
+println "Node executable: ${nodeExecutables.node}"
+println "NPX executable: ${nodeExecutables.npx}"

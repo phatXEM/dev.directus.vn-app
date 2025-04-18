@@ -1,6 +1,8 @@
-package com.rn_apple_login
+package vn.dev.directus
 
 import android.app.Application
+import android.content.Context
+import androidx.multidex.MultiDex
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -14,6 +16,9 @@ import com.facebook.soloader.SoLoader
 // Import the Facebook SDK
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
+// Import Google Sign-In
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 class MainApplication : Application(), ReactApplication {
 
@@ -36,6 +41,12 @@ class MainApplication : Application(), ReactApplication {
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
 
+  // Add the attachBaseContext method to initialize MultiDex
+  override fun attachBaseContext(base: Context) {
+    super.attachBaseContext(base)
+    MultiDex.install(this)
+  }
+
   override fun onCreate() {
     super.onCreate()
     SoLoader.init(this, OpenSourceMergedSoMapping)
@@ -47,5 +58,12 @@ class MainApplication : Application(), ReactApplication {
     // Initialize Facebook SDK
     FacebookSdk.sdkInitialize(applicationContext)
     AppEventsLogger.activateApp(this)
+    
+    // Initialize Google Sign-In with default configuration
+    // Note: The specific configuration is handled in the MainActivity
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+      .requestEmail()
+      .build()
+    GoogleSignIn.getClient(this, gso)
   }
 }

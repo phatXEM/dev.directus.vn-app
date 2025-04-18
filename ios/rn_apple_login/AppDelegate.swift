@@ -3,6 +3,7 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import FBSDKCoreKit
+import GoogleSignIn
 
 // Import RNConfig to access environment variables
 @_implementationOnly import RNConfig
@@ -20,6 +21,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   ) -> Bool {
     // Initialize Facebook SDK FIRST - IMPORTANT: Do this before starting React Native
     initializeFacebookSDK()
+    
+    // Initialize Google Sign-In
+    configureGoogleSignIn()
     
     // Initialize React Native components
     let delegate = ReactNativeDelegate()
@@ -40,7 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       self.updateFacebookConfiguration(notification.userInfo)
     }
     
-    // Start React Native
     factory.startReactNative(
       withModuleName: "rn_apple_login",
       in: window,
@@ -75,12 +78,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     print("[Facebook] SDK initialized with App ID: \(Settings.shared.appID ?? "NOT SET")")
   }
   
+  // Configure Google Sign-In with client ID
+  func configureGoogleSignIn() {
+    // Try to get Google client ID from RNConfig
+    if let clientID = RNConfig.getValueForKey("googleClientID"), !clientID.isEmpty {
+      print("[Google] Setting Client ID from RNConfig: \(clientID)")
+      GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+    } else if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String, !clientID.isEmpty {
+      print("[Google] Setting Client ID from Info.plist: \(clientID)")
+      GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+    } else {
+      print("[Google] WARNING: No Google Client ID found. Will wait for values from React Native.")
+    }
+    
+    // Listen for RNConfig updates to set Google configuration
+    NotificationCenter.default.addObserver(
+      forName: NSNotification.Name("RNConfigEnvironmentUpdated"),
+      object: nil,
+      queue: .main
+    ) { notification in
+      if let userInfo = notification.userInfo,
+         let clientID = userInfo["googleClientID"] as? String,
+         !clientID.isEmpty {
+        print("[Google] Updating Client ID from notification: \(clientID)")
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+      }
+    }
+  }
+  
   // Handle Facebook URL schemes
   func application(
     _ app: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey : Any] = [:]
   ) -> Bool {
+    // Handle Google Sign-In callback
+    if GIDSignIn.sharedInstance.handle(url) {
+      return true
+    }
+    
+    // Handle Facebook callback
     return ApplicationDelegate.shared.application(
       app,
       open: url,

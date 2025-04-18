@@ -15,6 +15,22 @@
       <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
       <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
       
+      <!-- Google Sign-In Configuration -->
+      <meta-data
+          android:name="com.google.android.gms.version"
+          android:value="@integer/google_play_services_version" />
+      
+      <!-- Splash Screen Activity -->
+      <activity
+        android:name=".SplashActivity"
+        android:theme="@style/AppTheme"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+      </activity>
+      
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"
@@ -22,9 +38,14 @@
         android:launchMode="singleTask"
         android:windowSoftInputMode="adjustResize"
         android:exported="true">
+        <!-- Google Sign-In Intent Filter -->
         <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data
+                android:host="oauth2redirect"
+                android:scheme="vn.dev.directus" />
         </intent-filter>
       </activity>
       
