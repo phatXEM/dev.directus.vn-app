@@ -14,8 +14,6 @@ import {
 GoogleSignin.configure({
   webClientId: GOOGLE_CLIENT_ID, // Using the client ID from .env file
   iosClientId: GOOGLE_IOS_CLIENT_ID, // iOS specific client ID
-  // androidClientId is not a valid property, use scopes for Android configuration
-  // scopes: ['profile', 'email'],
   offlineAccess: true,
 });
 

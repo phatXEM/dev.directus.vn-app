@@ -76,3 +76,6 @@ yarn-error.log
 
 # Environment variables
 .env
+
+# Android release
+*.apk
