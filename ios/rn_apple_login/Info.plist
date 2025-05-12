@@ -26,6 +26,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb9668855269861444</string>
+				<string>devdirectusapp</string>
 			</array>
 		</dict>
 		<dict>

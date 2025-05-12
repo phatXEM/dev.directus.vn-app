@@ -1,5 +1,10 @@
 import React from 'react';
-import { useColorScheme, ActivityIndicator, View, StyleSheet } from 'react-native';
+import {
+  useColorScheme,
+  ActivityIndicator,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,28 +14,7 @@ import HomeScreen from '@screens/HomeScreen';
 import DetailsScreen from '@screens/DetailsScreen';
 import LoginScreen from '@screens/LoginScreen';
 import { useAuth } from '@context/AuthContext';
-
-// Define types for our navigation
-export type RootStackParamList = {
-  Home: undefined;
-  Details: undefined;
-  Login: undefined;
-};
-
-export type HomeScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Home'
->;
-
-export type DetailsScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Details'
->;
-
-export type LoginScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Login'
->;
+import { RootStackParamList } from '@/types/navigation';
 
 // Create the stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();

@@ -1,19 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from '@services/api';
+import { authService } from '@/services/auth';
 import { appleAuthService } from '@services/appleAuth';
 import { facebookAuthService } from '@services/facebookAuth';
 import { googleAuthService } from '@services/googleAuth';
-
-type User = {
-  id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  role?: string;
-  provider?: string;
-};
+import { User } from '@/types/user';
 
 type AuthResult = {
   success: boolean;
@@ -30,7 +27,12 @@ type AuthContextType = {
   loginWithGoogle: () => Promise<AuthResult>;
   logout: () => Promise<void>;
   user: User | null;
+  updateUser?: (user: Partial<User>) => Promise<void>;
   isAppleAuthAvailable: boolean;
+};
+
+type AuthProviderProps = {
+  children: ReactNode;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,9 +45,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
@@ -232,6 +232,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const updateUser = async (_user: Partial<User>) => {
+    try {
+      setIsLoading(true);
+      const updatedUser = await authService.updateCurrentUser(_user);
+      setUser(updatedUser);
+      await AsyncStorage.setItem('@user_data', JSON.stringify(updatedUser));
+    } catch (error) {
+      console.error('Error updating user:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -243,6 +256,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loginWithGoogle,
         logout,
         user,
+        updateUser,
         isAppleAuthAvailable,
       }}
     >

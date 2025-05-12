@@ -106,12 +106,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   }
   
-  // Handle Facebook URL schemes
+  // Handle URL schemes
   func application(
     _ app: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey : Any] = [:]
   ) -> Bool {
+    // Handle Strava deep link (devdirectusapp://auth)
+    if url.scheme == "devdirectusapp" {
+      return RCTLinkingManager.application(app, open: url, options: options)
+    }
+    
     // Handle Google Sign-In callback
     if GIDSignIn.sharedInstance.handle(url) {
       return true
@@ -124,6 +129,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
       annotation: options[UIApplication.OpenURLOptionsKey.annotation]
     )
+  }
+  
+  // Handle universal links (optional for future use)
+  func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
   }
   
   // Update Facebook configuration with values from environment variables

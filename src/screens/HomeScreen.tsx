@@ -1,17 +1,60 @@
-import React from 'react';
-import { StyleSheet, useColorScheme, View, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, useColorScheme, View, Image, Linking } from 'react-native';
 import { Button, Text, Divider } from 'react-native-elements';
-import { HomeScreenNavigationProp } from '@navigation/AppNavigator';
+import type { HomeScreenNavigationProp } from '@/types/navigation';
 import { useAuth } from '@context/AuthContext';
-import { API_URL } from '@env';
+import { API_URL, STRAVA_REDIRECT_URI } from '@env';
+import { exchangeStravaCode, getStravaAuthUrl } from '@/services/stravaAuth';
+import { authService } from '@/services/auth';
 
-type HomeScreenProps = {
-  navigation: HomeScreenNavigationProp;
-};
-
-const HomeScreen = ({ navigation }: HomeScreenProps) => {
+const HomeScreen = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const { user, logout, isLoading } = useAuth();
+  const { user, updateUser, logout, isLoading } = useAuth(); // Include setUser from useAuth to update user state
+  const [error, setError] = useState<string | null>(null); // Add state for error handling
+
+  // Handle deep link redirect from Strava
+  useEffect(() => {
+    const handleUrl = async ({ url }: { url: string }) => {
+      if (url.startsWith(STRAVA_REDIRECT_URI)) {
+        const code = new URL(url).searchParams.get('code');
+        if (code) {
+          try {
+            const exchange = await exchangeStravaCode(code);
+            console.log('Strava exchange response:', exchange);
+            if (updateUser) {
+              // await updateUser({
+              //   id: user?.id,
+              // });
+            }
+            // const updatedUser = await authService.getCurrentUser();
+            // setUser(updatedUser); // Update the user in the auth context
+          } catch (err) {
+            setError('Failed to connect Strava');
+            console.error('Error connecting to Strava:', err);
+          }
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener('url', handleUrl);
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleUrl({ url });
+      }
+    });
+
+    return () => subscription.remove();
+  }, [updateUser, user?.id]);
+
+  const handleConnectToStrava = async () => {
+    try {
+      const url = await getStravaAuthUrl();
+      await Linking.openURL(url); // Open the Strava auth URL in the browser
+    } catch (err) {
+      setError('Failed to open Strava authorization page');
+      console.error('Error generating Strava URL:', err);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -46,9 +89,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   return (
     <View style={styles.screenContainer}>
-      {/* {user?.avatar && getAvatarUrl() && (
+      {!!user?.avatar && !!getAvatarUrl() && (
         <Image source={{ uri: getAvatarUrl() }} style={styles.avatar} />
-      )} */}
+      )}
 
       <Text h1 style={isDarkMode ? styles.darkText : styles.lightText}>
         Welcome
@@ -76,11 +119,22 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
       <Divider style={styles.divider} />
 
-      <Button
-        title="Go to Details"
-        onPress={() => navigation.navigate('Details')}
-        buttonStyle={styles.button}
-      />
+      {!user?.strava_athlete_id ? (
+        <Button
+          title="Connect to Strava"
+          onPress={handleConnectToStrava}
+          buttonStyle={styles.button}
+        />
+      ) : (
+        <Text
+          style={[
+            styles.description,
+            isDarkMode ? styles.darkText : styles.lightText,
+          ]}
+        >
+          Strava Connected (Athlete ID: {user.strava_athlete_id})
+        </Text>
+      )}
 
       <Button
         title="Logout"
@@ -89,6 +143,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         buttonStyle={[styles.button, styles.logoutButton]}
         type="outline"
       />
+
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 };
@@ -133,6 +189,11 @@ const styles = StyleSheet.create({
   },
   lightText: {
     // color: '#000000',
+  },
+  error: {
+    color: 'red',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
 

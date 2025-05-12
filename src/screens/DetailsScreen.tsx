@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, useColorScheme, View } from 'react-native';
 import { Button, Text } from 'react-native-elements';
-import { DetailsScreenNavigationProp } from '@navigation/AppNavigator';
+import { DetailsScreenNavigationProp } from '@/types/navigation';
 
 type DetailsScreenProps = {
   navigation: DetailsScreenNavigationProp;

@@ -6,7 +6,6 @@ import axios from 'axios';
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_ANDROID_CLIENT_ID,
   GOOGLE_REDIRECT_URI,
 } from '@env';
 

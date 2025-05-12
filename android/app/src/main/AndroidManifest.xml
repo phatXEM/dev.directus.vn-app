@@ -47,6 +47,13 @@
                 android:host="oauth2redirect"
                 android:scheme="vn.dev.directus" />
         </intent-filter>
+
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="devdirectusapp" android:host="auth" />
+        </intent-filter>
       </activity>
       
       <!-- Facebook Activity for Login -->
