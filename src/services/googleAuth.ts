@@ -16,12 +16,6 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
-// Define the response type for OAuth login
-interface OAuthResponse {
-  access_token: string;
-  refresh_token: string;
-}
-
 export const googleAuthService = {
   async signInWithGoogle() {
     try {
@@ -30,32 +24,19 @@ export const googleAuthService = {
 
       // Sign in with Google
       const userInfo = await GoogleSignin.signIn();
-      const { data } = userInfo;
+      const tokens = await GoogleSignin.getTokens();
+      const { accessToken } = tokens;
 
-      if (data?.user) {
-        const { email, name } = data?.user;
+      const res = await axios.post(GOOGLE_REDIRECT_URI, {
+        code: accessToken,
+      });
 
-        if (email) {
-          const res = await axios.post(
-            GOOGLE_REDIRECT_URI,
-            {
-              email,
-              name,
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
+      if (res.status !== 200) {
+        throw new Error('Error in Google authentication');
+      }
 
-          if (res.status !== 200) {
-            throw new Error('Error in Google authentication');
-          }
-          if (res.data) {
-            return res.data;
-          }
-        }
+      if (res.data) {
+        return res.data;
       }
 
       throw new Error('User data not found');

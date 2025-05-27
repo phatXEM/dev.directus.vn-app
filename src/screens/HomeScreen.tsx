@@ -89,8 +89,8 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.screenContainer}>
-      {!!user?.avatar && !!getAvatarUrl() && (
-        <Image source={{ uri: getAvatarUrl() }} style={styles.avatar} />
+      {!!user?.avatar && getAvatarUrl() && (
+        <Image source={{ uri: getAvatarUrl() || undefined }} style={styles.avatar} />
       )}
 
       <Text h1 style={isDarkMode ? styles.darkText : styles.lightText}>
@@ -119,7 +119,7 @@ const HomeScreen = () => {
 
       <Divider style={styles.divider} />
 
-      {!user?.strava_athlete_id ? (
+      {/* {!user?.strava_athlete_id ? (
         <Button
           title="Connect to Strava"
           onPress={handleConnectToStrava}
@@ -134,7 +134,7 @@ const HomeScreen = () => {
         >
           Strava Connected (Athlete ID: {user.strava_athlete_id})
         </Text>
-      )}
+      )} */}
 
       <Button
         title="Logout"
