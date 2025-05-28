@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import appleAuth from '@invertase/react-native-apple-authentication';
 import axios from 'axios';
-import { APPLE_REDIRECT_URI } from '@env';
+import { APPLE_CLIENT_ID, APPLE_REDIRECT_URI } from '@env';
 
 /**
  * Service to handle Apple authentication
@@ -29,6 +29,7 @@ export const appleAuthService = {
         APPLE_REDIRECT_URI,
         {
           code: appleAuthRequestResponse?.authorizationCode,
+          client_id: APPLE_CLIENT_ID,
         },
         {
           headers: {
